@@ -1,5 +1,6 @@
 ---
 import ChatWidget from '../components/ChatWidget.astro';
+import '../styles/global.css';
 
 export interface Props {
   title: string;
@@ -28,7 +29,6 @@ function getLessonContext(pathname: string): string {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title} — Electrónica desde Cero</title>
-    <link rel="stylesheet" href="/src/styles/global.css" />
   </head>
   <body>
     <!-- Mobile hamburger -->
