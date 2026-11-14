@@ -7,36 +7,51 @@ const { lessonContext } = Astro.props;
 ---
 
 <div class="chat-widget" id="chat-widget" data-lesson-context={lessonContext || ''}>
-  <!-- Floating button -->
   <button class="chat-toggle" id="chat-toggle" aria-label="Abrir chat del tutor">
     <span class="chat-icon">🤖</span>
   </button>
 
-  <!-- Chat panel -->
   <div class="chat-panel" id="chat-panel">
     <div class="chat-header">
-      <span>Tutor de electrónica</span>
-      <button class="chat-close" id="chat-close" aria-label="Cerrar chat">✕</button>
+      <div class="chat-header-left">
+        <span class="chat-avatar">🤖</span>
+        <div>
+          <div class="chat-header-title">Tutor de electrónica</div>
+          <div class="chat-header-sub">IA · Claude Haiku</div>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-action" id="chat-clear" title="Limpiar historial" aria-label="Limpiar historial">🗑️</button>
+        <button class="chat-close" id="chat-close" aria-label="Cerrar chat">✕</button>
+      </div>
     </div>
 
     <div class="chat-messages" id="chat-messages">
+      <div class="chat-day-divider"><span>Hoy</span></div>
       <div class="chat-msg assistant">
-        👋 ¡Hola! Soy tu tutor de electrónica. Pregúntame cualquier duda sobre las lecciones, circuitos, componentes... Para lo que necesites.
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-bubble">
+          <div class="msg-content">¡Hola! Soy tu tutor de electrónica. Pregúntame cualquier duda sobre las lecciones, circuitos, componentes... Estoy aquí para ayudarte.</div>
+        </div>
       </div>
     </div>
 
     <div class="chat-input-area">
       <textarea
         id="chat-input"
-        placeholder="Escribe tu duda..."
+        placeholder="Escribe tu duda sobre electrónica..."
         rows="1"
       ></textarea>
       <button class="chat-send" id="chat-send" aria-label="Enviar mensaje">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
         </svg>
       </button>
+    </div>
+
+    <div class="chat-footer">
+      <span>Pregunta lo que necesites · Historial de 20 mensajes</span>
     </div>
   </div>
 </div>
@@ -50,16 +65,16 @@ const { lessonContext } = Astro.props;
     font-family: var(--font-sans);
   }
 
-  /* ── Toggle button ── */
+  /* ── Toggle ── */
   .chat-toggle {
-    width: 54px;
-    height: 54px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: #fff;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
     align-items: center;
@@ -69,7 +84,7 @@ const { lessonContext } = Astro.props;
 
   .chat-toggle:hover {
     transform: scale(1.06);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+    box-shadow: 0 6px 22px rgba(37, 99, 235, 0.4);
   }
 
   .chat-icon { font-size: 1.5rem; }
@@ -79,16 +94,21 @@ const { lessonContext } = Astro.props;
     display: none;
     flex-direction: column;
     position: absolute;
-    bottom: 70px;
+    bottom: 72px;
     right: 0;
-    width: 370px;
-    height: 500px;
-    max-height: calc(100dvh - 140px);
+    width: 400px;
+    height: 560px;
+    max-height: calc(100dvh - 150px);
     background: var(--color-surface);
-    border-radius: 14px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
-    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 0 0 1px var(--color-border);
     overflow: hidden;
+    animation: panelIn 0.25s ease;
+  }
+
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   .chat-panel.open { display: flex; }
@@ -99,86 +119,248 @@ const { lessonContext } = Astro.props;
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1rem;
-    background: var(--color-primary);
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
     color: #fff;
-    font-weight: 600;
-    font-size: 0.95rem;
+    flex-shrink: 0;
   }
 
-  .chat-close {
+  .chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .chat-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .chat-header-title { font-weight: 600; font-size: 0.92rem; line-height: 1.2; }
+  .chat-header-sub { font-size: 0.72rem; opacity: 0.7; line-height: 1.2; }
+
+  .chat-header-actions { display: flex; gap: 0.25rem; }
+
+  .chat-action, .chat-close {
     background: none;
     border: none;
     color: #fff;
-    font-size: 1.15rem;
     cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    line-height: 1;
+    padding: 0.25rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
     opacity: 0.75;
-    transition: opacity 0.15s;
+    transition: opacity 0.15s, background 0.15s;
+    line-height: 1;
   }
 
-  .chat-close:hover { opacity: 1; }
+  .chat-action:hover, .chat-close:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.12);
+  }
 
   /* ── Messages ── */
   .chat-messages {
     flex: 1;
     overflow-y: auto;
-    padding: 0.75rem;
+    padding: 0.75rem 0.85rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
     scroll-behavior: smooth;
+    background: #f8f9fb;
   }
 
+  .chat-day-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.35rem 0 0.5rem;
+  }
+
+  .chat-day-divider span {
+    font-size: 0.7rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f8f9fb;
+    padding: 0 0.5rem;
+    margin: 0 auto;
+  }
+
+  .chat-day-divider::before,
+  .chat-day-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+
+  /* ── Message bubbles ── */
   .chat-msg {
-    max-width: 85%;
-    padding: 0.55rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.88rem;
-    line-height: 1.5;
-    word-break: break-word;
-    animation: msgIn 0.25s ease;
+    display: flex;
+    gap: 0.45rem;
+    max-width: 90%;
+    animation: msgIn 0.3s ease;
   }
 
   @keyframes msgIn {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   .chat-msg.user {
     align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+
+  .chat-msg.user .msg-avatar {
+    background: var(--color-primary-light);
+  }
+
+  .chat-msg.assistant .msg-avatar {
+    background: var(--color-code-bg);
+  }
+
+  .msg-bubble {
+    padding: 0.6rem 0.8rem;
+    border-radius: 14px;
+    line-height: 1.55;
+  }
+
+  .chat-msg.user .msg-bubble {
     background: var(--color-primary);
     color: #fff;
     border-bottom-right-radius: 4px;
   }
 
-  .chat-msg.assistant {
-    align-self: flex-start;
-    background: var(--color-code-bg);
+  .chat-msg.assistant .msg-bubble {
+    background: #fff;
     color: var(--color-text);
+    border: 1px solid var(--color-border);
     border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
 
-  .chat-msg.assistant code {
+  .msg-content { font-size: 0.88rem; }
+
+  /* Markdown-style in assistant messages */
+  .chat-msg.assistant .msg-content strong {
+    color: #1a1a1a;
+  }
+
+  .chat-msg.assistant .msg-content code {
     font-family: var(--font-mono);
     font-size: 0.85em;
     background: rgba(0,0,0,0.06);
-    padding: 0.1em 0.3em;
+    padding: 0.1em 0.35em;
     border-radius: 3px;
   }
 
-  .chat-typing {
-    align-self: flex-start;
-    padding: 0.55rem 0.75rem;
-    color: var(--color-text-muted);
-    font-size: 0.85rem;
+  .chat-msg.assistant .msg-content pre {
+    margin: 0.35rem 0;
+    padding: 0.5rem 0.65rem;
+    background: #f1f3f5;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
   }
 
-  /* ── Input ── */
+  .chat-msg.assistant .msg-content p { margin: 0.25rem 0; }
+  .chat-msg.assistant .msg-content p:first-child { margin-top: 0; }
+  .chat-msg.assistant .msg-content p:last-child { margin-bottom: 0; }
+
+  .chat-msg.assistant .msg-content ul, 
+  .chat-msg.assistant .msg-content ol {
+    margin: 0.25rem 0 0.25rem 1.2rem;
+    padding: 0;
+  }
+
+  .chat-msg.assistant .msg-content li { margin: 0.1rem 0; }
+
+  .msg-time {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.65);
+    margin-top: 0.15rem;
+    text-align: right;
+  }
+
+  .chat-msg.assistant .msg-time {
+    color: #999;
+    text-align: left;
+  }
+
+  /* ── Typing indicator ── */
+  .chat-typing {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    align-self: flex-start;
+    padding-left: 0.3rem;
+  }
+
+  .chat-typing .typing-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-code-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  .typing-dots {
+    display: flex;
+    gap: 3px;
+    padding: 0.55rem 0.85rem;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+  }
+
+  .typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #bbb;
+    animation: dotBounce 1.3s infinite;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes dotBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); }
+  }
+
+  /* ── Input area ── */
   .chat-input-area {
     display: flex;
     align-items: flex-end;
-    gap: 0.4rem;
+    gap: 0.5rem;
     padding: 0.6rem 0.75rem;
     border-top: 1px solid var(--color-border);
     background: var(--color-surface);
@@ -186,24 +368,27 @@ const { lessonContext } = Astro.props;
 
   .chat-input-area textarea {
     flex: 1;
-    padding: 0.5rem 0.7rem;
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
+    padding: 0.55rem 0.85rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: 22px;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+    line-height: 1.45;
     resize: none;
-    max-height: 100px;
+    max-height: 110px;
     outline: none;
     transition: border-color 0.15s;
+    background: #f8f9fb;
   }
 
   .chat-input-area textarea:focus {
     border-color: var(--color-primary);
+    background: #fff;
   }
 
   .chat-send {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: var(--color-primary);
     color: #fff;
@@ -213,24 +398,33 @@ const { lessonContext } = Astro.props;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: background 0.15s;
+    transition: background 0.15s, transform 0.15s;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .chat-send:hover { background: #1d4ed8; }
-  .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .chat-send:hover { background: #1d4ed8; transform: scale(1.05); }
+  .chat-send:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  /* ── Footer ── */
+  .chat-footer {
+    padding: 0.35rem 0.85rem;
+    text-align: center;
+    font-size: 0.65rem;
+    color: #bbb;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
 
   /* ── Mobile ── */
   @media (max-width: 520px) {
+    .chat-widget { bottom: 1rem; right: 0.75rem; }
+    .chat-toggle { width: 50px; height: 50px; }
     .chat-panel {
-      width: calc(100vw - 2rem);
-      right: -0.5rem;
-      height: 420px;
+      width: calc(100vw - 1.5rem);
+      right: -0.25rem;
+      height: 460px;
       max-height: calc(100dvh - 130px);
-    }
-    .chat-toggle {
-      width: 48px;
-      height: 48px;
+      border-radius: 14px;
     }
   }
 </style>
@@ -239,15 +433,16 @@ const { lessonContext } = Astro.props;
   interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
+    time: string;
   }
 
   const STORAGE_KEY = 'elec-chat-history';
-  const lessonContext = document.currentScript?.getAttribute('data-lesson-context') ||
-    document.querySelector('[data-lesson-context]')?.getAttribute('data-lesson-context') || '';
+  const MAX_HISTORY = 20;
 
   const toggle = document.getElementById('chat-toggle')!;
   const panel = document.getElementById('chat-panel')!;
   const closeBtn = document.getElementById('chat-close')!;
+  const clearBtn = document.getElementById('chat-clear')!;
   const messagesEl = document.getElementById('chat-messages')!;
   const inputEl = document.getElementById('chat-input') as HTMLTextAreaElement;
   const sendBtn = document.getElementById('chat-send')!;
@@ -261,7 +456,10 @@ const { lessonContext } = Astro.props;
     isOpen = true;
     panel.classList.add('open');
     toggle.style.display = 'none';
-    inputEl.focus();
+    setTimeout(() => {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      inputEl.focus();
+    }, 100);
   }
 
   function closePanel() {
@@ -272,57 +470,136 @@ const { lessonContext } = Astro.props;
 
   toggle.addEventListener('click', openPanel);
   closeBtn.addEventListener('click', closePanel);
-
-  // Esc to close
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOpen) closePanel();
   });
 
-  // ── Load history ──
+  // ── Clear history ──
+  clearBtn.addEventListener('click', () => {
+    if (confirm('¿Borrar todo el historial de chat?')) {
+      messages = [];
+      localStorage.removeItem(STORAGE_KEY);
+      rebuildMessages();
+    }
+  });
+
+  // ── History ──
   function loadHistory() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        messages = JSON.parse(saved);
+        messages = JSON.parse(saved).slice(-MAX_HISTORY);
         rebuildMessages();
       }
     } catch { /* ignore */ }
   }
 
   function saveHistory() {
-    // Keep last 30 messages
-    const toSave = messages.slice(-30);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-MAX_HISTORY)));
   }
 
   function rebuildMessages() {
-    // Remove all except the first greeting
-    const existing = messagesEl.querySelectorAll('.chat-msg');
-    existing.forEach((el, i) => {
-      if (i > 0 || !el.classList.contains('assistant')) el.remove();
-    });
-    // Rebuild from history (skip greeting in stored messages)
-    const greetingMsg = messagesEl.querySelector('.chat-msg.assistant');
     messagesEl.innerHTML = '';
-    if (greetingMsg) messagesEl.appendChild(greetingMsg.cloneNode(true));
-    messages.forEach((m) => appendMessage(m.role, m.content));
-  }
 
-  function appendMessage(role: string, content: string) {
-    const div = document.createElement('div');
-    div.className = `chat-msg ${role}`;
-    div.innerHTML = content.replace(/\n/g, '<br>');
-    messagesEl.appendChild(div);
+    // Day divider
+    const divider = document.createElement('div');
+    divider.className = 'chat-day-divider';
+    divider.innerHTML = '<span>Hoy</span>';
+    messagesEl.appendChild(divider);
+
+    // Greeting if empty
+    if (messages.length === 0) {
+      appendGreeting();
+      return;
+    }
+
+    messages.forEach((m) => appendBubble(m.role, m.content, m.time, false));
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
-  function showTyping() {
+  function appendGreeting() {
+    const msg = createBubble('assistant', 
+      '¡Hola! Soy tu tutor de electrónica. Pregúntame cualquier duda sobre las lecciones, circuitos, componentes... Estoy aquí para ayudarte.',
+      formatTime(new Date()));
+    messagesEl.appendChild(msg);
+  }
+
+  function createBubble(role: string, content: string, time: string): HTMLElement {
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar';
+    avatar.textContent = role === 'user' ? '👤' : '🤖';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+
+    const msgContent = document.createElement('div');
+    msgContent.className = 'msg-content';
+    msgContent.innerHTML = renderContent(content, role);
+
+    const msgTime = document.createElement('div');
+    msgTime.className = 'msg-time';
+    msgTime.textContent = time;
+
+    bubble.appendChild(msgContent);
+    bubble.appendChild(msgTime);
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+
+    return div;
+  }
+
+  function appendBubble(role: string, content: string, time: string, animate = true) {
+    const el = createBubble(role, content, time);
+    if (!animate) el.style.animation = 'none';
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function renderContent(text: string, role: string): string {
+    if (role === 'user') {
+      return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+    // Assistant: basic markdown
+    let html = escapeHtml(text);
+    // Bold
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // Line breaks
+    html = html.replace(/\n/g, '<br>');
+    // Bullet points
+    html = html.replace(/(?:^|<br>)- (.+?)(?=<br>|$)/g, '<br>• $1');
+    // Clean leading br
+    html = html.replace(/^<br>/, '');
+    return html;
+  }
+
+  function escapeHtml(s: string): string {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function formatTime(date: Date): string {
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ── Typing indicator ──
+  function showTyping(): HTMLElement {
     const div = document.createElement('div');
     div.className = 'chat-typing';
     div.id = 'chat-typing';
-    div.textContent = '🤖 Escribiendo...';
+    div.innerHTML = `
+      <div class="typing-avatar">🤖</div>
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>`;
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
   }
 
   function hideTyping() {
@@ -339,37 +616,45 @@ const { lessonContext } = Astro.props;
     inputEl.value = '';
     inputEl.style.height = 'auto';
 
-    // Add user message
-    appendMessage('user', text);
-    messages.push({ role: 'user', content: text });
+    const now = new Date();
+    const time = formatTime(now);
+
+    appendBubble('user', text, time);
+    messages.push({ role: 'user', content: text, time });
 
     showTyping();
+
+    const lessonContext = document.getElementById('chat-widget')?.getAttribute('data-lesson-context') || '';
 
     try {
       const resp = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages,
+          messages: messages.map(m => ({ role: m.role, content: m.content })),
           lessonContext,
         }),
       });
 
       hideTyping();
 
+      const respTime = formatTime(new Date());
+
       if (!resp.ok) {
         const err = await resp.json();
-        appendMessage('assistant', `⚠️ ${err.error || 'Error de conexión'}`);
+        appendBubble('assistant', err.error || 'Error de conexión', respTime);
+        messages.push({ role: 'assistant', content: err.error || 'Error', time: respTime });
       } else {
         const data = await resp.json();
-        appendMessage('assistant', data.content);
-        messages.push({ role: 'assistant', content: data.content });
+        appendBubble('assistant', data.content, respTime);
+        messages.push({ role: 'assistant', content: data.content, time: respTime });
       }
 
       saveHistory();
     } catch {
       hideTyping();
-      appendMessage('assistant', '⚠️ No se pudo conectar con el tutor.');
+      const respTime = formatTime(new Date());
+      appendBubble('assistant', 'No se pudo conectar con el tutor.', respTime);
     }
 
     isSending = false;
@@ -378,8 +663,6 @@ const { lessonContext } = Astro.props;
   }
 
   sendBtn.addEventListener('click', sendMessage);
-
-  // Enter to send, Shift+Enter for newline
   inputEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -387,10 +670,10 @@ const { lessonContext } = Astro.props;
     }
   });
 
-  // Auto-resize textarea
+  // Auto-resize
   inputEl.addEventListener('input', () => {
     inputEl.style.height = 'auto';
-    inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 110) + 'px';
   });
 
   loadHistory();
