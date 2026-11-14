@@ -1,0 +1,397 @@
+---
+export interface Props {
+  lessonContext?: string;
+}
+
+const { lessonContext } = Astro.props;
+---
+
+<div class="chat-widget" id="chat-widget" data-lesson-context={lessonContext || ''}>
+  <!-- Floating button -->
+  <button class="chat-toggle" id="chat-toggle" aria-label="Abrir chat del tutor">
+    <span class="chat-icon">🤖</span>
+  </button>
+
+  <!-- Chat panel -->
+  <div class="chat-panel" id="chat-panel">
+    <div class="chat-header">
+      <span>Tutor de electrónica</span>
+      <button class="chat-close" id="chat-close" aria-label="Cerrar chat">✕</button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg assistant">
+        👋 ¡Hola! Soy tu tutor de electrónica. Pregúntame cualquier duda sobre las lecciones, circuitos, componentes... Para lo que necesites.
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <textarea
+        id="chat-input"
+        placeholder="Escribe tu duda..."
+        rows="1"
+      ></textarea>
+      <button class="chat-send" id="chat-send" aria-label="Enviar mensaje">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .chat-widget {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    z-index: 1000;
+    font-family: var(--font-sans);
+  }
+
+  /* ── Toggle button ── */
+  .chat-toggle {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .chat-toggle:hover {
+    transform: scale(1.06);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+  }
+
+  .chat-icon { font-size: 1.5rem; }
+
+  /* ── Panel ── */
+  .chat-panel {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 370px;
+    height: 500px;
+    max-height: calc(100dvh - 140px);
+    background: var(--color-surface);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+
+  .chat-panel.open { display: flex; }
+
+  /* ── Header ── */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .chat-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    line-height: 1;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+  }
+
+  .chat-close:hover { opacity: 1; }
+
+  /* ── Messages ── */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    scroll-behavior: smooth;
+  }
+
+  .chat-msg {
+    max-width: 85%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    word-break: break-word;
+    animation: msgIn 0.25s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-msg.user {
+    align-self: flex-end;
+    background: var(--color-primary);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+
+  .chat-msg.assistant {
+    align-self: flex-start;
+    background: var(--color-code-bg);
+    color: var(--color-text);
+    border-bottom-left-radius: 4px;
+  }
+
+  .chat-msg.assistant code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: rgba(0,0,0,0.06);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+
+  .chat-typing {
+    align-self: flex-start;
+    padding: 0.55rem 0.75rem;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  /* ── Input ── */
+  .chat-input-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .chat-input-area textarea {
+    flex: 1;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: none;
+    max-height: 100px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .chat-input-area textarea:focus {
+    border-color: var(--color-primary);
+  }
+
+  .chat-send {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .chat-send:hover { background: #1d4ed8; }
+  .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Mobile ── */
+  @media (max-width: 520px) {
+    .chat-panel {
+      width: calc(100vw - 2rem);
+      right: -0.5rem;
+      height: 420px;
+      max-height: calc(100dvh - 130px);
+    }
+    .chat-toggle {
+      width: 48px;
+      height: 48px;
+    }
+  }
+</style>
+
+<script>
+  interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+  }
+
+  const STORAGE_KEY = 'elec-chat-history';
+  const lessonContext = document.currentScript?.getAttribute('data-lesson-context') ||
+    document.querySelector('[data-lesson-context]')?.getAttribute('data-lesson-context') || '';
+
+  const toggle = document.getElementById('chat-toggle')!;
+  const panel = document.getElementById('chat-panel')!;
+  const closeBtn = document.getElementById('chat-close')!;
+  const messagesEl = document.getElementById('chat-messages')!;
+  const inputEl = document.getElementById('chat-input') as HTMLTextAreaElement;
+  const sendBtn = document.getElementById('chat-send')!;
+
+  let messages: ChatMessage[] = [];
+  let isOpen = false;
+  let isSending = false;
+
+  // ── Panel open/close ──
+  function openPanel() {
+    isOpen = true;
+    panel.classList.add('open');
+    toggle.style.display = 'none';
+    inputEl.focus();
+  }
+
+  function closePanel() {
+    isOpen = false;
+    panel.classList.remove('open');
+    toggle.style.display = 'flex';
+  }
+
+  toggle.addEventListener('click', openPanel);
+  closeBtn.addEventListener('click', closePanel);
+
+  // Esc to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) closePanel();
+  });
+
+  // ── Load history ──
+  function loadHistory() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        messages = JSON.parse(saved);
+        rebuildMessages();
+      }
+    } catch { /* ignore */ }
+  }
+
+  function saveHistory() {
+    // Keep last 30 messages
+    const toSave = messages.slice(-30);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  }
+
+  function rebuildMessages() {
+    // Remove all except the first greeting
+    const existing = messagesEl.querySelectorAll('.chat-msg');
+    existing.forEach((el, i) => {
+      if (i > 0 || !el.classList.contains('assistant')) el.remove();
+    });
+    // Rebuild from history (skip greeting in stored messages)
+    const greetingMsg = messagesEl.querySelector('.chat-msg.assistant');
+    messagesEl.innerHTML = '';
+    if (greetingMsg) messagesEl.appendChild(greetingMsg.cloneNode(true));
+    messages.forEach((m) => appendMessage(m.role, m.content));
+  }
+
+  function appendMessage(role: string, content: string) {
+    const div = document.createElement('div');
+    div.className = `chat-msg ${role}`;
+    div.innerHTML = content.replace(/\n/g, '<br>');
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'chat-typing';
+    div.id = 'chat-typing';
+    div.textContent = '🤖 Escribiendo...';
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function hideTyping() {
+    document.getElementById('chat-typing')?.remove();
+  }
+
+  // ── Send ──
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text || isSending) return;
+
+    isSending = true;
+    sendBtn.disabled = true;
+    inputEl.value = '';
+    inputEl.style.height = 'auto';
+
+    // Add user message
+    appendMessage('user', text);
+    messages.push({ role: 'user', content: text });
+
+    showTyping();
+
+    try {
+      const resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages,
+          lessonContext,
+        }),
+      });
+
+      hideTyping();
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        appendMessage('assistant', `⚠️ ${err.error || 'Error de conexión'}`);
+      } else {
+        const data = await resp.json();
+        appendMessage('assistant', data.content);
+        messages.push({ role: 'assistant', content: data.content });
+      }
+
+      saveHistory();
+    } catch {
+      hideTyping();
+      appendMessage('assistant', '⚠️ No se pudo conectar con el tutor.');
+    }
+
+    isSending = false;
+    sendBtn.disabled = false;
+    inputEl.focus();
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  // Enter to send, Shift+Enter for newline
+  inputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // Auto-resize textarea
+  inputEl.addEventListener('input', () => {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
+  });
+
+  loadHistory();
+</script>

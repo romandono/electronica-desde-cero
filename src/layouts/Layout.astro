@@ -1,9 +1,25 @@
 ---
+import ChatWidget from '../components/ChatWidget.astro';
+
 export interface Props {
   title: string;
   lessonNumber?: number;
 }
 const { title, lessonNumber } = Astro.props;
+
+const lessonTitles: Record<string, string> = {
+  '/lecciones/01-electricidad': 'Electricidad y Ley de Ohm',
+  '/lecciones/02-circuitos': 'Circuitos serie y paralelo',
+  '/lecciones/03-potencia': 'Potencia y energía',
+  '/lecciones/04-kirchhoff': 'Leyes de Kirchhoff',
+};
+
+function getLessonContext(pathname: string): string {
+  for (const [prefix, title] of Object.entries(lessonTitles)) {
+    if (pathname.startsWith(prefix)) return title;
+  }
+  return pathname.includes('examenes') ? 'Examen de electrónica' : '';
+}
 ---
 
 <!doctype html>
@@ -64,6 +80,8 @@ const { title, lessonNumber } = Astro.props;
       }
       <slot />
     </main>
+
+    <ChatWidget lessonContext={getLessonContext(Astro.url.pathname)} />
 
     <script>
       const toggle = document.getElementById('menu-toggle')!;
