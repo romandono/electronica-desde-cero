@@ -1,0 +1,92 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Quiz from '../../components/Quiz.astro';
+import { exams, getQuestionsByIds } from '../../data/questions';
+
+interface Props {
+  examId: string;
+}
+
+const { examId } = Astro.params;
+const exam = exams.find((e) => e.id === examId);
+
+if (!exam) {
+  return Astro.redirect('/examenes');
+}
+
+const questions = getQuestionsByIds(exam.questionIds, { shuffle: true });
+---
+
+<Layout title={exam.title}>
+  <h1>{exam.title}</h1>
+  <p class="exam-description">{exam.description}</p>
+
+  <div class="exam-meta">
+    <div class="exam-stat">
+      <span class="stat-label">Preguntas</span>
+      <span class="stat-value">{questions.length}</span>
+    </div>
+    <div class="exam-stat">
+      <span class="stat-label">Aprobado con</span>
+      <span class="stat-value">{exam.passThreshold}%</span>
+    </div>
+    {exam.timeLimit && (
+      <div class="exam-stat">
+        <span class="stat-label">Tiempo límite</span>
+        <span class="stat-value">{exam.timeLimit} min</span>
+      </div>
+    )}
+  </div>
+
+  <div class="callout warning">
+    <strong>📋 Instrucciones:</strong> Lee cada pregunta con atención. En las de tipo test,
+    selecciona la opción correcta y pulsa <strong>Comprobar</strong>. En las de texto,
+    escribe tu respuesta y compárala con la esperada. Puedes repetir el examen cuantas
+    veces quieras para mejorar tu puntuación.
+  </div>
+
+  <Quiz
+    lessonKey={`exam-${exam.id}`}
+    questions={questions}
+    retryable={true}
+    showScore={true}
+  />
+
+  <div class="lesson-nav">
+    <a href="/examenes">← Todos los exámenes</a>
+    <a href="/">← Volver al índice</a>
+  </div>
+</Layout>
+
+<style>
+  .exam-description {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .exam-meta {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .exam-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+  }
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+</style>

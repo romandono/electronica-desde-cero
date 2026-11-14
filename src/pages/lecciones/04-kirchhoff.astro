@@ -1,0 +1,158 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Quiz from '../../components/Quiz.astro';
+import { getQuestionsByLesson } from '../../data/questions';
+
+const questions = getQuestionsByLesson('l04-kirchhoff', 5);
+---
+
+<Layout title="Lección 4: Leyes de Kirchhoff" lessonNumber={4}>
+  <h1>Leyes de Kirchhoff</h1>
+
+  <h2>Objetivo</h2>
+  <p>Comprender las dos leyes de Kirchhoff — corrientes en nodos y tensiones en mallas — y aplicarlas para analizar circuitos que no se pueden reducir a serie/paralelo simple.</p>
+
+  <h2>1. ¿Para qué necesitamos Kirchhoff?</h2>
+  <p>La Ley de Ohm (V = I × R) te dice qué pasa en <strong>un componente</strong>. Pero cuando tienes múltiples fuentes, ramas que se cruzan y configuraciones que no son puramente serie o paralelo, Ohm solo no basta.</p>
+
+  <p>Kirchhoff te da las reglas para relacionar <strong>varios componentes entre sí</strong>.</p>
+
+  <div class="callout">
+    <strong>💡 Resumen:</strong> Ohm = dentro del componente. Kirchhoff = entre componentes.
+  </div>
+
+  <h2>2. Conceptos previos: nodo, rama y malla</h2>
+  <table>
+    <tr><th>Nodo</th><td>Punto donde se unen 3 o más conductores (2 conductores = mismo nodo, no es bifurcación).</td></tr>
+    <tr><th>Rama</th><td>Camino entre dos nodos que contiene componentes.</td></tr>
+    <tr><th>Malla</th><td>Camino cerrado que empieza y termina en el mismo nodo sin pasar dos veces por el mismo punto.</td></tr>
+  </table>
+
+  <pre><code>
+     Nodo A
+     /    \
+   [R1]  [R2]
+   /        \
+ Nodo B —[R3]— Nodo C
+</code></pre>
+
+  <h2>3. Primera Ley: Ley de Corrientes (KCL)</h2>
+  <div class="callout">
+    <strong>📐 KCL — Ley de Corrientes de Kirchhoff:</strong><br/>
+    La suma de las corrientes que entran en un nodo es igual a la suma de las corrientes que salen.
+  </div>
+
+  <div class="formula">Σ I_entran = Σ I_salen</div>
+
+  <p>O equivalentemente: <strong>la suma algebraica de corrientes en un nodo es cero</strong>.</p>
+
+  <h3>Analogía del agua</h3>
+  <p>Imagina una tubería que se divide en dos. El agua que entra (10 L/s) debe ser igual a la que sale por las dos ramas juntas (6 + 4 = 10 L/s). No puede desaparecer agua en la unión.</p>
+
+  <h3>Ejemplo numérico</h3>
+  <pre><code>En un nodo:
+  Entran: I1 = 3 A, I2 = 2 A
+  Salen:  I3 = 1 A, I4 = ?
+
+  KCL: 3 + 2 = 1 + I4
+  I4 = 4 A</code></pre>
+
+  <h2>4. Segunda Ley: Ley de Tensiones (KVL)</h2>
+  <div class="callout">
+    <strong>📐 KVL — Ley de Tensiones de Kirchhoff:</strong><br/>
+    La suma algebraica de todas las tensiones a lo largo de una malla cerrada es cero.
+  </div>
+
+  <div class="formula">Σ V = 0 (en cualquier lazo cerrado)</div>
+
+  <h3>¿Qué significa "suma algebraica"?</h3>
+  <p>Significa que hay que tener en cuenta el <strong>signo</strong> de cada tensión según el sentido de recorrido:</p>
+  <ul>
+    <li>Si recorres una fuente de – a + : <strong>subida</strong> de tensión (+V)</li>
+    <li>Si recorres una fuente de + a – : <strong>bajada</strong> de tensión (−V)</li>
+    <li>Si recorres una resistencia en el sentido de la corriente: <strong>caída</strong> de tensión (−I×R)</li>
+  </ul>
+
+  <h3>Ejemplo: malla simple</h3>
+  <pre><code>
+     +----[ R1=4Ω ]----[ R2=8Ω ]----+
+     |                              |
+    +|                              |
+    --- 12V                         |
+    ---                            |
+     |                              |
+     +------------------------------+
+
+  Recorriendo en sentido horario desde la fuente:
+  +12V (subida en la fuente)
+  −I×4  (caída en R1)
+  −I×8  (caída en R2)
+  = 0
+
+  KVL: 12 − 4I − 8I = 0
+  12 − 12I = 0
+  I = 1 A</code></pre>
+
+  <p>Comprobación: V_R1 = 1×4 = 4V, V_R2 = 1×8 = 8V, y 4 + 8 = 12V ✓</p>
+
+  <h2>5. Aplicación práctica: LED con resistencia (otra vez)</h2>
+  <p>El circuito LED + resistencia que ya conoces es un ejemplo perfecto de KVL:</p>
+
+  <pre><code>Malla: fuente 5V → resistencia R → LED → vuelta a fuente
+
+KVL: 5V − I×R − 2V = 0
+(2V es la caída típica del LED)
+
+I×R = 3V
+R = 3V / I
+
+Para I = 20 mA: R = 3/0.02 = 150 Ω</code></pre>
+
+  <p>Es exactamente lo que hicimos en la Lección 1, pero ahora con el respaldo formal de KVL.</p>
+
+  <h2>6. Circuitos con múltiples mallas</h2>
+  <p>Cuando hay más de una malla, necesitas una ecuación KVL por cada malla independiente:</p>
+
+  <pre><code>
+       +---[R1]---+---[R2]---+
+       |          |          |
+      +|         [R3]        |
+      --- V1      |         --- V2
+      ---         |         ---
+       |          |          |
+       +----------+----------+
+       
+  Malla 1 (izquierda): V1 − I1×R1 − (I1−I2)×R3 = 0
+  Malla 2 (derecha):  −V2 − I2×R2 − (I2−I1)×R3 = 0
+  
+  Dos ecuaciones, dos incógnitas (I1, I2). Sistema resoluble.</code></pre>
+
+  <div class="callout warning">
+    <strong>⚠️ Signo de las corrientes compartidas:</strong> Cuando una resistencia está en dos mallas, la corriente que la atraviesa es la <strong>diferencia</strong> de las corrientes de malla. El signo depende del sentido relativo.
+  </div>
+
+  <h2>7. Estrategia general para analizar un circuito</h2>
+  <ol>
+    <li>Identificar nodos, ramas y mallas</li>
+    <li>Asignar sentidos de corriente (si te equivocas, el resultado sale negativo)</li>
+    <li>Plantear KCL en los nodos (n-1 ecuaciones para n nodos)</li>
+    <li>Plantear KVL en las mallas independientes</li>
+    <li>Resolver el sistema de ecuaciones</li>
+    <li>Verificar que los resultados tienen sentido físico</li>
+  </ol>
+
+  <h2>8. Errores habituales</h2>
+  <ol>
+    <li><strong>Olvidar el signo:</strong> una caída de tensión en sentido de la corriente es negativa.</li>
+    <li><strong>Confundir nodo con esquina:</strong> dos cables unidos sin bifurcación es el mismo nodo.</li>
+    <li><strong>Signo de corrientes de malla compartidas:</strong> la corriente neta en una resistencia compartida es I1 − I2 o I2 − I1 según el sentido.</li>
+    <li><strong>Pensar que Kirchhoff es "avanzado":</strong> ya lo usaste sin saberlo al calcular la resistencia del LED. Solo le estamos poniendo nombre.</li>
+  </ol>
+
+  <Quiz lessonKey="l04-kirchhoff" questions={questions} />
+
+  <div class="lesson-nav">
+    <a href="/lecciones/03-potencia">← Lección 3</a>
+    <span></span>
+  </div>
+</Layout>

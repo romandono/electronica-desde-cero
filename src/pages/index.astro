@@ -1,0 +1,58 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Índice">
+  <h1>Electrónica desde Cero</h1>
+  <p>
+    Programa de formación progresiva en electricidad, electrónica y sistemas embebidos.
+    De principiante absoluto a diseñar tus propios dispositivos.
+  </p>
+
+  <h2>📚 Fase 1: Fundamentos de electricidad</h2>
+
+  <a href="/lecciones/01-electricidad" class="lesson-card">
+    <div class="lc-number">Lección 1</div>
+    <div class="lc-title">Electricidad y Ley de Ohm</div>
+    <div class="lc-meta">
+      Carga eléctrica, tensión, corriente, resistencia. Circuito abierto y cerrado. Ley de Ohm. Prefijos de unidades.
+    </div>
+  </a>
+
+  <a href="/lecciones/02-circuitos" class="lesson-card">
+    <div class="lc-number">Lección 2</div>
+    <div class="lc-title">Circuitos en serie y paralelo</div>
+    <div class="lc-meta">
+      Resistencia equivalente. Comportamiento de V e I en serie y paralelo. Divisor de tensión. Circuitos mixtos.
+    </div>
+  </a>
+
+  <a href="/lecciones/03-potencia" class="lesson-card">
+    <div class="lc-number">Lección 3</div>
+    <div class="lc-title">Potencia y energía eléctrica</div>
+    <div class="lc-meta">
+      Potencia (P=V×I), energía (kWh), efecto Joule. Dimensionamiento de resistencias. Baterías y capacidad.
+    </div>
+  </a>
+
+  <a href="/lecciones/04-kirchhoff" class="lesson-card">
+    <div class="lc-number">Lección 4</div>
+    <div class="lc-title">Leyes de Kirchhoff</div>
+    <div class="lc-meta">
+      KCL (corrientes en nodos), KVL (tensiones en mallas). Análisis de circuitos con múltiples fuentes y mallas.
+    </div>
+  </a>
+
+  <div style="margin-top:2rem;padding:1rem;background:var(--color-primary-light);border-radius:8px;">
+    <strong>🔜 Próxima fase:</strong> Fase 2 — Instrumentación y montaje (multímetro, protoboard, mediciones)
+  </div>
+
+  <h2 style="margin-top:2.5rem;">📝 Exámenes</h2>
+  <a href="/examenes/fase1" class="lesson-card">
+    <div class="lc-number">Examen</div>
+    <div class="lc-title">Fase 1: Fundamentos de Electricidad</div>
+    <div class="lc-meta">
+      24 preguntas de las 4 lecciones · Aprobado: 70% · Aleatorio en cada intento
+    </div>
+  </a>
+</Layout>

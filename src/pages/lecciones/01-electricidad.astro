@@ -1,0 +1,244 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Quiz from '../../components/Quiz.astro';
+import { getQuestionsByLesson } from '../../data/questions';
+
+const questions = getQuestionsByLesson('l01-electricidad', 5);
+---
+
+<Layout title="Lección 1: Electricidad y Ley de Ohm" lessonNumber={1}>
+  <h1>Electricidad y Ley de Ohm</h1>
+
+  <h2>Objetivo</h2>
+  <p>
+    Entender qué es la electricidad, qué son la tensión, la corriente y la resistencia,
+    y cómo se relacionan mediante la Ley de Ohm.
+  </p>
+
+  <h2>1. ¿Qué es la electricidad?</h2>
+  <p>
+    <strong>La electricidad es el movimiento ordenado de electrones a través de un material conductor.</strong>
+  </p>
+  <p>
+    Todo lo que nos rodea está hecho de átomos. Un átomo tiene un núcleo (protones + neutrones)
+    y electrones girando alrededor. Los electrones tienen <strong>carga eléctrica negativa</strong>.
+    Los protones, positiva.
+  </p>
+  <p>
+    En un material <strong>conductor</strong> (como el cobre), algunos electrones están débilmente
+    ligados al átomo y pueden "saltar" de un átomo a otro. Cuando aplicamos una fuerza que los
+    empuja, estos electrones se mueven todos en la misma dirección. Ese flujo ordenado
+    <strong>es</strong> la electricidad.
+  </p>
+
+  <div class="callout">
+    <strong>💡 Idea clave:</strong> Los electrones ya están ahí, en el cable, como agua dentro
+    de una manguera. La electricidad no es "crear" electrones, es <strong>ponerlos en movimiento</strong>.
+  </div>
+
+  <h2>2. Los tres conceptos fundamentales</h2>
+
+  <h3>2.1 Tensión (voltaje) — La "presión" que empuja</h3>
+  <table>
+    <tr><th>Símbolo</th><td><strong>V</strong> (a veces E o U)</td></tr>
+    <tr><th>Unidad</th><td><strong>Voltio (V)</strong></td></tr>
+  </table>
+  <p>
+    La tensión es la <strong>diferencia de potencial eléctrico</strong> entre dos puntos.
+    Es lo que empuja a los electrones. Si no hay diferencia de potencial, no hay movimiento.
+  </p>
+  <p>
+    Es como dos tanques de agua conectados por un tubo: si ambos están al mismo nivel,
+    el agua no fluye. Si uno está más alto, el agua fluye hacia el más bajo.
+  </p>
+  <div class="callout">
+    <strong>⚠️ Importante:</strong> La tensión <strong>siempre se mide entre dos puntos</strong>.
+    No existe "tensión en un punto" por sí solo; siempre es respecto a otro punto de referencia.
+  </div>
+  <ul>
+    <li>Pila AA: <strong>1.5 V</strong></li>
+    <li>USB: <strong>5 V</strong></li>
+    <li>Batería de auto: <strong>12 V</strong></li>
+    <li>Toma de pared (Europa): <strong>230 V</strong></li>
+  </ul>
+
+  <h3>2.2 Corriente (intensidad) — El "caudal" que fluye</h3>
+  <table>
+    <tr><th>Símbolo</th><td><strong>I</strong></td></tr>
+    <tr><th>Unidad</th><td><strong>Amperio (A)</strong></td></tr>
+  </table>
+  <p>
+    La corriente es la <strong>cantidad de carga eléctrica que atraviesa un punto por segundo</strong>.
+    Dicho más simple: cuántos electrones están pasando.
+  </p>
+  <p>
+    En la analogía del agua: la corriente es el caudal. Cuántos litros por segundo pasan por la manguera.
+  </p>
+  <ul>
+    <li>Un LED consume ~<strong>0.02 A</strong> (20 mA)</li>
+    <li>Un cargador de móvil entrega ~<strong>1 A o 2 A</strong></li>
+    <li>Un motor de arranque de auto puede consumir <strong>100-200 A</strong></li>
+  </ul>
+  <p>
+    En circuitos pequeños trabajaremos con <strong>miliamperios (mA)</strong>. 1 mA = 0.001 A.
+  </p>
+
+  <h3>2.3 Resistencia — La "oposición" al paso</h3>
+  <table>
+    <tr><th>Símbolo</th><td><strong>R</strong></td></tr>
+    <tr><th>Unidad</th><td><strong>Ohmio (Ω)</strong></td></tr>
+  </table>
+  <p>
+    La resistencia es la <strong>oposición que un material ofrece al paso de la corriente</strong>.
+    Todo material tiene cierta resistencia, incluso un cable de cobre (aunque muy baja).
+  </p>
+  <p>
+    En la analogía del agua: la resistencia es el diámetro de la manguera. Una manguera fina
+    opone más resistencia que una gruesa. O piensa en una esponja dentro del tubo: dificulta el paso.
+  </p>
+  <ul>
+    <li>Cable de cobre: fracciones de ohmio</li>
+    <li>Resistor típico: <strong>220 Ω, 1 kΩ, 10 kΩ</strong></li>
+    <li>Aire seco: millones de ohmios (aislante)</li>
+  </ul>
+
+  <h2>3. Analogía hidráulica</h2>
+
+  <table>
+    <thead>
+      <tr><th>Concepto eléctrico</th><th>Analogía del agua</th><th>Símbolo</th><th>Unidad</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Tensión</td><td>Presión / altura del tanque</td><td>V</td><td>Voltio (V)</td></tr>
+      <tr><td>Corriente</td><td>Caudal de agua</td><td>I</td><td>Amperio (A)</td></tr>
+      <tr><td>Resistencia</td><td>Estrechez del tubo</td><td>R</td><td>Ohmio (Ω)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <strong>⚠️ Limitaciones de la analogía:</strong>
+    <ul>
+      <li>El agua fluye <em>dentro</em> de la manguera; la energía eléctrica viaja por el
+        <strong>campo electromagnético alrededor del cable</strong>, no "dentro" del cable.</li>
+      <li>Si abres una manguera, el agua se derrama. Si abres un circuito, la corriente
+        simplemente se detiene.</li>
+      <li>La electricidad no es un fluido; es movimiento de carga. No hay "moléculas de electricidad".</li>
+    </ul>
+  </div>
+
+  <h2>4. La Ley de Ohm</h2>
+  <p>Es la relación fundamental entre los tres conceptos:</p>
+
+  <div class="formula">V = I × R</div>
+
+  <ul>
+    <li><strong>V</strong> = Tensión en voltios (V)</li>
+    <li><strong>I</strong> = Corriente en amperios (A)</li>
+    <li><strong>R</strong> = Resistencia en ohmios (Ω)</li>
+  </ul>
+
+  <p>
+    <strong>¿Qué dice?</strong> La tensión aplicada a un circuito es igual a la corriente
+    que circula multiplicada por la resistencia que encuentra.
+  </p>
+
+  <p>Despejando las otras formas:</p>
+
+  <div class="formula">I = V / R</div>
+  <div class="formula">R = V / I</div>
+
+  <h3>Ejemplo numérico</h3>
+  <p>
+    Tienes una pila de <strong>5 V</strong> y una resistencia de <strong>220 Ω</strong>.
+    ¿Cuánta corriente circula?
+  </p>
+
+  <pre><code>I = V / R = 5 V / 220 Ω = 0.0227 A = <strong>22.7 mA</strong></code></pre>
+
+  <p>Dos conclusiones importantes:</p>
+  <ol>
+    <li>Circulan unos 23 mA. Suficiente para encender un LED sin quemarlo.</li>
+    <li>Si la resistencia fuera más chica (ej: 100 Ω), la corriente subiría a 50 mA.
+      <strong>A menor resistencia, mayor corriente.</strong></li>
+  </ol>
+
+  <div class="callout warning">
+    <strong>⚠️ Cortocircuito:</strong> Un cable sin resistencia es un camino de resistencia
+    casi nula. Según Ohm: I = V / R ≈ V / 0 → corriente enorme → el cable se calienta,
+    la fuente se puede dañar. <strong>Nunca conectes directamente los bornes de una fuente.</strong>
+  </div>
+
+  <h2>5. Circuito abierto y circuito cerrado</h2>
+  <ul>
+    <li><strong>Circuito cerrado:</strong> hay un camino completo para que la corriente fluya.
+      Circula corriente.</li>
+    <li><strong>Circuito abierto:</strong> el camino está interrumpido (interruptor apagado,
+      cable suelto). La corriente es <strong>cero</strong>. La tensión de la fuente sigue
+      existiendo, pero no hay flujo.</li>
+  </ul>
+  <p>
+    Imagina la manguera con un grifo cerrado: hay presión (tensión), pero no hay caudal (corriente).
+  </p>
+
+  <h2>6. Esquema de un circuito simple</h2>
+  <pre><code>
+   +-----[ R 220Ω ]-----+
+   |                    |
+  +|                    |
+  --- 5V              LED (enciende si I > ~10 mA)
+  ---                  |
+   |                    |
+   +--------------------+
+  
+  La resistencia R limita cuánta corriente pasa por el LED.
+  Sin resistencia, el LED se quema.
+  </code></pre>
+
+  <h2>7. Prefijos de unidades</h2>
+  <p>
+    En electrónica trabajamos con valores muy pequeños y muy grandes.
+    Los prefijos evitan tener que escribir <code>0.000003 A</code>.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Prefijo</th><th>Símbolo</th><th>Factor</th><th>Ejemplo</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>mega</td><td>M</td><td>× 1 000 000</td><td>1 MΩ = 1 000 000 Ω</td></tr>
+      <tr><td>kilo</td><td>k</td><td>× 1 000</td><td>1 kΩ = 1 000 Ω</td></tr>
+      <tr><td>—</td><td>—</td><td>× 1</td><td>1 A</td></tr>
+      <tr><td>mili</td><td>m</td><td>÷ 1 000</td><td>1 mA = 0.001 A</td></tr>
+      <tr><td>micro</td><td>µ</td><td>÷ 1 000 000</td><td>1 µA = 0.000001 A</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <strong>⚠️ Regla práctica:</strong> Antes de aplicar cualquier fórmula, pasa todo a
+    <strong>unidades base</strong> (A, V, Ω). Después del cálculo, conviertes el resultado
+    al prefijo que convenga.
+  </div>
+
+  <p><strong>Truco útil:</strong> mA × kΩ = V (las potencias de 10 se cancelan)</p>
+  <pre><code>3 mA × 1 kΩ = (3 × 10⁻³) × (1 × 10³) = 3 × 10⁰ = 3 V</code></pre>
+
+  <h2>8. Errores habituales</h2>
+  <ol>
+    <li><strong>Confundir mA con A:</strong> 3 mA no son 3 A. Siempre verifica el prefijo.</li>
+    <li><strong>Conectar LED sin resistencia:</strong> el LED se quema. Siempre pon una R en serie.</li>
+    <li><strong>Medir corriente como si fuera tensión:</strong> el multímetro se configura distinto
+      y se conecta en serie, no en paralelo. Lo veremos en detalle más adelante.</li>
+    <li><strong>Olvidar que la tensión se mide entre dos puntos:</strong> no tiene sentido decir
+      "este cable tiene 5 V" sin decir respecto a qué.</li>
+  </ol>
+
+  <Quiz
+    lessonKey="l01-electricidad"
+    questions={questions}
+  />
+
+  <div class="lesson-nav">
+    <span></span>
+    <a href="/">← Volver al índice</a>
+  </div>
+</Layout>

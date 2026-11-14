@@ -1,0 +1,35 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { exams } from '../../data/questions';
+---
+
+<Layout title="Exámenes">
+  <h1>📝 Exámenes</h1>
+  <p>
+    Evalúa tu comprensión de cada fase. Cada examen agrupa preguntas de varias lecciones.
+    Puedes repetirlos para mejorar tu puntuación.
+  </p>
+
+  <div style="margin-top:2rem;">
+    {exams.length === 0 ? (
+      <p style="color:var(--color-text-muted);">
+        No hay exámenes disponibles todavía. Se irán desbloqueando conforme avances en las lecciones.
+      </p>
+    ) : (
+      exams.map((exam) => (
+        <a href={`/examenes/${exam.id}`} class="lesson-card">
+          <div class="lc-number">Examen</div>
+          <div class="lc-title">{exam.title}</div>
+          <div class="lc-meta">
+            {exam.questionIds.length} preguntas · Aprobado: {exam.passThreshold}%
+            {exam.timeLimit ? ` · ${exam.timeLimit} min` : ''}
+          </div>
+        </a>
+      ))
+    )}
+  </div>
+
+  <div style="margin-top:3rem;">
+    <a href="/">← Volver al índice</a>
+  </div>
+</Layout>

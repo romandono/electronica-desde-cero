@@ -1,0 +1,122 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Quiz from '../../components/Quiz.astro';
+import { getQuestionsByLesson } from '../../data/questions';
+
+const questions = getQuestionsByLesson('l03-potencia', 5);
+---
+
+<Layout title="Lección 3: Potencia y energía eléctrica" lessonNumber={3}>
+  <h1>Potencia y energía eléctrica</h1>
+
+  <h2>Objetivo</h2>
+  <p>Entender qué es la potencia eléctrica, cómo se calcula, qué es la energía, el efecto Joule y cómo dimensionar componentes para que no se quemen.</p>
+
+  <h2>1. ¿Qué es la potencia eléctrica?</h2>
+  <p>La <strong>potencia</strong> es la cantidad de energía que se consume o transforma por unidad de tiempo. En electricidad: la rapidez con la que un componente convierte energía eléctrica en otra forma (luz, calor, movimiento).</p>
+
+  <table>
+    <tr><th>Símbolo</th><td><strong>P</strong></td></tr>
+    <tr><th>Unidad</th><td><strong>Vatio (W)</strong></td></tr>
+  </table>
+
+  <div class="formula">P = V × I</div>
+
+  <p>Usando la Ley de Ohm, obtenemos dos formas más:</p>
+  <div class="formula">P = I² × R</div>
+  <div class="formula">P = V² / R</div>
+
+  <div class="callout">
+    <strong>💡 Intuición:</strong> Potencia = "fuerza" (tensión) × "caudal" (corriente). Misma lógica que potencia hidráulica = presión × caudal.
+  </div>
+
+  <h2>2. Ejemplos de cálculo</h2>
+
+  <h3>Ejemplo 1: Potencia en una resistencia</h3>
+  <p>Resistencia de 100 Ω con 5 V aplicados:</p>
+  <pre><code>P = V² / R = 25 / 100 = 0.25 W = 250 mW</code></pre>
+  <p>Una resistencia típica de 1/4 W (0.25 W) estaría <strong>justo al límite</strong>. En la práctica usarías una de 1/2 W (0.5 W) para tener margen.</p>
+
+  <h3>Ejemplo 2: Consumo de un LED con resistencia</h3>
+  <p>LED (2V, 20mA) + resistencia limitadora a 5V:</p>
+  <pre><code>P_LED = 2V × 0.02A = 0.04 W = 40 mW
+P_R = (5V - 2V) × 0.02A = 3V × 0.02A = 0.06 W = 60 mW
+P_total = 5V × 0.02A = 0.1 W = 100 mW</code></pre>
+
+  <h2>3. Energía eléctrica</h2>
+  <p>La <strong>energía</strong> es la potencia mantenida durante un tiempo:</p>
+
+  <div class="formula">E = P × t</div>
+
+  <table>
+    <tr><th>Unidad SI</th><td><strong>Julio (J)</strong> = 1 W × 1 s</td></tr>
+    <tr><th>Unidad práctica</th><td><strong>Kilovatio-hora (kWh)</strong> = 1000 W × 1 h</td></tr>
+  </table>
+
+  <p>Conversión: 1 kWh = 3 600 000 J (3.6 millones de julios).</p>
+
+  <h3>Ejemplo: consumo de una bombilla</h3>
+  <p>Bombilla LED de 10 W encendida 5 horas al día:</p>
+  <pre><code>E_diaria = 10W × 5h = 50 Wh = 0.05 kWh
+E_mensual = 0.05 × 30 = 1.5 kWh
+Coste ≈ 1.5 × 0.15€ = 0.23€ al mes</code></pre>
+
+  <h2>4. El efecto Joule</h2>
+  <p>Cuando la corriente atraviesa una resistencia, parte de la energía se disipa en forma de <strong>calor</strong>. Esto es el <strong>efecto Joule</strong>.</p>
+
+  <div class="formula">P_calor = I² × R</div>
+
+  <p>No es un "defecto": a veces es el objetivo (estufas, soldadores, secadores). Pero en electrónica, el calor excesivo daña componentes.</p>
+
+  <div class="callout warning">
+    <strong>⚠️ Clave para no quemar cosas:</strong> Todo componente tiene una <strong>potencia nominal máxima</strong>. Si la superas, se destruye. Siempre calcula P y compárala con la especificación.
+  </div>
+
+  <h2>5. Dimensionamiento de resistencias</h2>
+  <p>Las resistencias no solo tienen un valor en ohmios: también tienen una <strong>potencia máxima</strong> que pueden disipar sin dañarse.</p>
+
+  <table>
+    <tr><th>Tamaño</th><th>Potencia típica</th><th>Uso</th></tr>
+    <tr><td>THT pequeña</td><td>1/8 W (0.125 W)</td><td>Señales, muy baja corriente</td></tr>
+    <tr><td>THT estándar</td><td>1/4 W (0.25 W)</td><td>Propósito general</td></tr>
+    <tr><td>THT mediana</td><td>1/2 W (0.5 W)</td><td>LEDs, corrientes moderadas</td></tr>
+    <tr><td>THT grande</td><td>1 W, 2 W, 5 W</td><td>Fuentes, potencia</td></tr>
+    <tr><td>SMD 0805</td><td>1/8 W (0.125 W)</td><td>Superficie, señales</td></tr>
+  </table>
+
+  <p><strong>Regla de seguridad:</strong> usa una resistencia con potencia nominal al menos <strong>el doble</strong> de la potencia calculada. Margen de seguridad.</p>
+
+  <h2>6. Relación potencia-tensión: cuidado con duplicar</h2>
+  <p>Como P = V²/R, si duplicas la tensión, la potencia se <strong>cuadruplica</strong>:</p>
+  <pre><code>V1 = 5V  → P1 = 25/R
+V2 = 10V → P2 = 100/R = 4 × P1</code></pre>
+  <p>Esto explica por qué un componente que funciona a 5 V puede quemarse instantáneamente a 12 V.</p>
+
+  <h2>7. Baterías y capacidad</h2>
+  <p>Las baterías se especifican en <strong>mAh o Ah</strong> (miliamperios-hora), no en julios:</p>
+  <pre><code>Batería 2000 mAh a 3.7 V:
+Energía = 3.7V × 2Ah = 7.4 Wh</code></pre>
+
+  <p>Para estimar duración:</p>
+  <pre><code>Dispositivo que consume 100 mA:
+Duración = 2000 mAh / 100 mA = 20 horas</code></pre>
+
+  <div class="callout warning">
+    <strong>⚠️ Ojo:</strong> La capacidad real depende de la corriente de descarga. A más corriente, menos capacidad efectiva. El datasheet manda.
+  </div>
+
+  <h2>8. Errores habituales</h2>
+  <ol>
+    <li><strong>Confundir potencia (W) con energía (kWh):</strong> W es instantáneo, kWh es acumulado.</li>
+    <li><strong>No comprobar la potencia de la resistencia:</strong> poner 0.5 W en una de 1/8 W = humo.</li>
+    <li><strong>Olvidar que I² crece rápido:</strong> el doble de corriente = cuádruple de calor.</li>
+    <li><strong>Usar mAh como medida de energía</strong> sin multiplicar por la tensión.</li>
+  </ol>
+
+  <Quiz lessonKey="l03-potencia" questions={questions} />
+
+  <div class="lesson-nav">
+    <a href="/lecciones/02-circuitos">← Lección 2</a>
+    <a href="/lecciones/04-kirchhoff">Lección 4 →</a>
+  </div>
+</Layout>

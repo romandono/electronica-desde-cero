@@ -1,0 +1,607 @@
+---
+export interface ChoiceOption {
+  label: string;
+  text: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  text: string;
+  type: 'choice' | 'text';
+  options?: ChoiceOption[];    // for type: 'choice'
+  correct?: number;            // index of correct option (0-based)
+  explanation?: string;        // shown after answering
+  modelAnswer?: string;        // for type: 'text' — shown after clicking comprobar
+}
+
+export interface Props {
+  lessonKey: string;
+  questions: QuizQuestion[];
+  retryable?: boolean;  // show retry button (default: true for lessons)
+  showScore?: boolean;  // show score summary (default: true)
+}
+
+const { lessonKey, questions, retryable = true, showScore = true } = Astro.props;
+---
+
+<div class="quiz-section" id="quiz">
+  <h2>📝 Preguntas de comprensión</h2>
+  <p class="quiz-intro">
+    Responde cada pregunta y pulsa <strong>Comprobar</strong> para ver la respuesta correcta.
+    Tus resultados se guardan automáticamente.
+  </p>
+
+  {
+    questions.map((q, i) => (
+      <div class="quiz-question" data-qid={q.id} data-lesson={lessonKey} data-type={q.type} data-correct={q.type === 'choice' ? q.correct : undefined} data-correct-label={q.type === 'choice' && q.options && q.correct !== undefined ? q.options[q.correct].label : undefined}>
+        <div class="q-number">Pregunta {i + 1}</div>
+        <div class="q-text">{q.text}</div>
+
+        {q.type === 'choice' && q.options ? (
+          <div class="q-choices">
+            {q.options.map((opt, oi) => (
+              <label class="choice-option" data-index={oi}>
+                <input type="radio" name={`quiz-${q.id}`} value={oi} />
+                <span class="choice-marker">{opt.label})</span>
+                <span>{opt.text}</span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div>
+            <textarea
+              id={`quiz-textarea-${q.id}`}
+              placeholder="Escribe tu respuesta aquí..."
+            ></textarea>
+            {q.modelAnswer && (
+              <input type="hidden" class="model-answer" value={q.modelAnswer} />
+            )}
+          </div>
+        )}
+
+        <div class="q-actions">
+          <button class="btn-check" data-qid={q.id}>
+            Comprobar
+          </button>
+          <span class="q-status" id={`status-${q.id}`}></span>
+        </div>
+
+        <div class="q-feedback" id={`feedback-${q.id}`} hidden>
+          {q.explanation && (
+            <div class="feedback-explanation" set:html={q.explanation} />
+          )}
+          {q.modelAnswer && (
+            <div class="feedback-model">
+              <strong>Respuesta esperada:</strong>
+              <p>{q.modelAnswer}</p>
+            </div>
+          )}
+          <div class="feedback-ai" id={`ai-${q.id}`} hidden>
+            <div class="ai-loading">🤖 Analizando tu respuesta...</div>
+            <div class="ai-result" hidden>
+              <strong>🤖 Evaluación del tutor:</strong>
+              <p class="ai-feedback-text"></p>
+              <ul class="ai-highlights"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+
+  <div class="quiz-footer">
+    {showScore && (
+      <div class="quiz-score" id="quiz-score" hidden>
+        <strong>Puntuación:</strong> <span id="score-text"></span>
+      </div>
+    )}
+    {retryable && (
+      <button class="btn-retry" id="btn-retry">
+        🔄 Reintentar cuestionario
+      </button>
+    )}
+    <p class="quiz-attempt" id="quiz-attempt"></p>
+  </div>
+</div>
+
+<style>
+  .quiz-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--color-border); }
+  .quiz-section h2 { border-bottom: none; margin-top: 0; }
+  .quiz-intro { color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+  .quiz-question {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin: 1rem 0;
+  }
+  .q-number { font-weight: 700; color: var(--color-primary); margin-bottom: 0.3rem; }
+  .q-text { margin-bottom: 0.75rem; font-weight: 500; }
+
+  /* ── Choices ── */
+  .q-choices { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.75rem; }
+  .choice-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .choice-option:hover { background: var(--color-primary-light); }
+  .choice-option input[type="radio"] { margin-top: 0.15rem; accent-color: var(--color-primary); }
+  .choice-marker { font-weight: 600; color: var(--color-text-muted); min-width: 1.5rem; }
+
+  .choice-option.correct { background: #d1fae5; border-color: #10b981; }
+  .choice-option.incorrect { background: #fee2e2; border-color: #ef4444; }
+  .choice-option.user-pick { font-weight: 600; }
+
+  /* ── Text input ── */
+  .quiz-question textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    resize: vertical;
+  }
+  .quiz-question textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+  }
+
+  /* ── Actions ── */
+  .q-actions { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+  .btn-check {
+    padding: 0.4rem 1rem;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .btn-check:hover { background: #1d4ed8; }
+  .btn-check:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .q-status { font-size: 0.85rem; font-weight: 600; }
+  .q-status.correct { color: #059669; }
+  .q-status.incorrect { color: #dc2626; }
+
+  /* ── Feedback ── */
+  .q-feedback {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: var(--color-code-bg);
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
+  }
+  .q-feedback.correct { background: #d1fae5; border-color: #10b981; }
+  .q-feedback.incorrect { background: #fee2e2; border-color: #ef4444; }
+  .feedback-model { margin-top: 0.5rem; }
+  .feedback-model p { margin: 0.3rem 0; }
+  .feedback-explanation { margin-bottom: 0.5rem; }
+
+  /* ── AI Feedback ── */
+  .feedback-ai { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--color-border); }
+  .ai-loading { color: var(--color-text-muted); font-size: 0.85rem; }
+  .ai-result p { margin: 0.3rem 0; }
+  .ai-highlights { margin: 0.3rem 0 0 1.2rem; font-size: 0.85rem; }
+  .ai-highlights li { margin: 0.15rem 0; }
+
+  /* ── Quiz Footer ── */
+  .quiz-footer { margin-top: 2rem; text-align: center; }
+  .quiz-score {
+    padding: 0.75rem 1rem;
+    background: var(--color-primary-light);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+  .quiz-score .perfect { color: #059669; }
+  .quiz-score .good { color: #2563eb; }
+  .quiz-score .needs-work { color: #d97706; }
+  .btn-retry {
+    padding: 0.6rem 1.5rem;
+    background: var(--color-surface);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.15s;
+  }
+  .btn-retry:hover { background: var(--color-primary-light); }
+  .quiz-attempt { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.5rem; }
+</style>
+
+<script>
+  const lessonKey = document.querySelector('[data-lesson]')?.getAttribute('data-lesson');
+
+  interface QuizConfig {
+    type: 'choice' | 'text';
+    correct?: number;
+    explanation?: string;
+    modelAnswer?: string;
+  }
+
+  // Question configs embedded from server props
+  const quizConfigs: Record<string, QuizConfig> = {};
+
+  document.querySelectorAll<HTMLElement>('.quiz-question').forEach((el) => {
+    const qid = el.getAttribute('data-qid')!;
+    const type = el.querySelector('.q-choices') ? 'choice' : 'text';
+
+    quizConfigs[qid] = { type };
+
+    // Build config from DOM
+    if (type === 'choice') {
+      const feedbackEl = el.querySelector(`#feedback-${qid}`);
+      const expEl = feedbackEl?.querySelector('.feedback-explanation');
+      quizConfigs[qid] = {
+        type: 'choice',
+        explanation: expEl?.innerHTML || undefined,
+      };
+    } else {
+      const feedbackEl = el.querySelector(`#feedback-${qid}`);
+      const modelEl = feedbackEl?.querySelector('.feedback-model p');
+      const expEl = feedbackEl?.querySelector('.feedback-explanation');
+      quizConfigs[qid] = {
+        type: 'text',
+        explanation: expEl?.innerHTML || undefined,
+        modelAnswer: modelEl?.textContent || undefined,
+      };
+    }
+  });
+
+  function getStorageKey(qid: string) {
+    return `elec-quiz-${lessonKey}-${qid}`;
+  }
+
+  function loadSavedState() {
+    document.querySelectorAll<HTMLElement>('.quiz-question').forEach((el) => {
+      const qid = el.getAttribute('data-qid')!;
+      const saved = localStorage.getItem(getStorageKey(qid));
+      if (!saved) return;
+      try {
+        const state = JSON.parse(saved);
+        const cfg = quizConfigs[qid];
+        if (!cfg) return;
+
+        if (cfg.type === 'choice' && state.selected !== undefined) {
+          const radio = el.querySelector<HTMLInputElement>(`input[value="${state.selected}"]`);
+          if (radio) radio.checked = true;
+        } else if (cfg.type === 'text' && state.answer) {
+          const ta = el.querySelector<HTMLTextAreaElement>('textarea');
+          if (ta) ta.value = state.answer;
+        }
+
+        if (state.checked) {
+          showResult(el, qid, state);
+          const btn = el.querySelector<HTMLButtonElement>('.btn-check');
+          if (btn) btn.disabled = true;
+        }
+      } catch (_) { /* ignore corrupt state */ }
+    });
+    calculateScore();
+  }
+
+  function saveState(qid: string, state: Record<string, unknown>) {
+    localStorage.setItem(getStorageKey(qid), JSON.stringify(state));
+  }
+
+  function showResult(el: HTMLElement, qid: string, state: Record<string, unknown>) {
+    const cfg = quizConfigs[qid];
+    if (!cfg) return;
+
+    const feedbackEl = el.querySelector<HTMLElement>(`#feedback-${qid}`);
+    const statusEl = el.querySelector<HTMLElement>(`#status-${qid}`);
+
+    if (cfg.type === 'choice') {
+      const selected = state.selected as number;
+      const correctIdx = state.correct as number;
+      const isCorrect = selected === correctIdx;
+
+      el.querySelectorAll('.choice-option').forEach((opt, i) => {
+        const idx = parseInt(opt.getAttribute('data-index') || '');
+        opt.classList.remove('correct', 'incorrect', 'user-pick');
+        if (idx === correctIdx) opt.classList.add('correct');
+        if (idx === selected && !isCorrect) opt.classList.add('incorrect', 'user-pick');
+        if (idx === selected && isCorrect) opt.classList.add('correct', 'user-pick');
+        const radio = opt.querySelector<HTMLInputElement>('input');
+        if (radio) radio.disabled = true;
+      });
+
+      if (statusEl) {
+        statusEl.textContent = isCorrect ? '✓ Correcto' : '✗ Incorrecto';
+        statusEl.className = `q-status ${isCorrect ? 'correct' : 'incorrect'}`;
+      }
+
+      if (feedbackEl) {
+        feedbackEl.hidden = false;
+        feedbackEl.className = `q-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+      }
+    } else {
+      // Text type: show model answer and call AI
+      if (statusEl) {
+        statusEl.textContent = '✓ Revisado';
+        statusEl.className = 'q-status correct';
+      }
+      if (feedbackEl) {
+        feedbackEl.hidden = false;
+        feedbackEl.className = 'q-feedback correct';
+      }
+
+      // Trigger AI evaluation
+      const questionText = el.querySelector('.q-text')?.textContent || '';
+      const studentAnswer = (state.answer as string) || '';
+      const modelAnswer = el.querySelector<HTMLInputElement>('.model-answer')?.value ||
+                          el.querySelector('.feedback-model p')?.textContent || '';
+
+      if (studentAnswer.trim() && modelAnswer) {
+        evaluateWithAI(el, qid, questionText, studentAnswer, modelAnswer);
+      }
+    }
+  }
+
+  async function evaluateWithAI(el: HTMLElement, qid: string, question: string, studentAnswer: string, modelAnswer: string) {
+    const aiDiv = el.querySelector<HTMLElement>(`#ai-${qid}`);
+    const loadingEl = aiDiv?.querySelector<HTMLElement>('.ai-loading');
+    const resultEl = aiDiv?.querySelector<HTMLElement>('.ai-result');
+    const feedbackText = aiDiv?.querySelector<HTMLElement>('.ai-feedback-text');
+    const highlightsList = aiDiv?.querySelector<HTMLElement>('.ai-highlights');
+
+    if (!aiDiv || !loadingEl || !resultEl) return;
+    aiDiv.hidden = false;
+    loadingEl.hidden = false;
+    resultEl.hidden = true;
+
+    // Check if we already have AI feedback cached
+    const cacheKey = getStorageKey(qid) + '-ai';
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const data = JSON.parse(cached);
+        displayAIResult(loadingEl, resultEl, feedbackText, highlightsList, data);
+        return;
+      } catch (_) { /* fall through */ }
+    }
+
+    try {
+      const resp = await fetch('/api/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, studentAnswer, modelAnswer }),
+      });
+
+      if (!resp.ok) {
+        loadingEl.textContent = '⚠️ No se pudo evaluar (error de conexión)';
+        return;
+      }
+
+      const data = await resp.json();
+      if (data.error) {
+        loadingEl.textContent = `⚠️ ${data.error}`;
+        return;
+      }
+
+      // Cache the result
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+      displayAIResult(loadingEl, resultEl, feedbackText, highlightsList, data);
+    } catch (err) {
+      loadingEl.textContent = '⚠️ Error al conectar con el tutor IA';
+    }
+  }
+
+  function displayAIResult(
+    loadingEl: HTMLElement,
+    resultEl: HTMLElement,
+    feedbackText: HTMLElement | null,
+    highlightsList: HTMLElement | null,
+    data: { verdict: string; feedback: string; highlights: string[] }
+  ) {
+    loadingEl.hidden = true;
+    resultEl.hidden = false;
+
+    const verdictEmoji = data.verdict === 'correct' ? '✅' : data.verdict === 'partial' ? '⚠️' : '❌';
+    if (feedbackText) {
+      feedbackText.textContent = `${verdictEmoji} ${data.feedback}`;
+    }
+    if (highlightsList) {
+      highlightsList.innerHTML = (data.highlights || []).map((h: string) => `<li>${h}</li>`).join('');
+    }
+  }
+
+  document.querySelectorAll('.btn-check').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const qid = btn.getAttribute('data-qid')!;
+      const el = document.querySelector<HTMLElement>(`.quiz-question[data-qid="${qid}"]`);
+      if (!el) return;
+
+      const cfg = quizConfigs[qid];
+      if (!cfg) return;
+
+      const state: Record<string, unknown> = { checked: true };
+
+      if (cfg.type === 'choice') {
+        const selected = el.querySelector<HTMLInputElement>('input:checked');
+        if (!selected) {
+          el.querySelector('.q-choices')?.classList.add('shake');
+          setTimeout(() => el.querySelector('.q-choices')?.classList.remove('shake'), 400);
+          return;
+        }
+        state.selected = parseInt(selected.value);
+        state.correct = parseInt(el.getAttribute('data-correct') || '');
+      } else {
+        const ta = el.querySelector<HTMLTextAreaElement>('textarea');
+        state.answer = ta?.value || '';
+      }
+
+      saveState(qid, state);
+      showResult(el, qid, state);
+      (btn as HTMLButtonElement).disabled = true;
+      calculateScore();
+    });
+  });
+
+  // Auto-save text answers on input (don't mark as checked)
+  document.querySelectorAll('.quiz-question textarea').forEach((ta) => {
+    let timeout: ReturnType<typeof setTimeout>;
+    ta.addEventListener('input', () => {
+      clearTimeout(timeout);
+      const qid = (ta.closest('.quiz-question') as HTMLElement)?.getAttribute('data-qid');
+      if (!qid) return;
+      timeout = setTimeout(() => {
+        const existing = localStorage.getItem(getStorageKey(qid));
+        const state = existing ? JSON.parse(existing) : {};
+        state.answer = (ta as HTMLTextAreaElement).value;
+        localStorage.setItem(getStorageKey(qid), JSON.stringify(state));
+      }, 600);
+    });
+  });
+
+  // ── Attempt history ──
+  const HISTORY_KEY = `elec-quiz-history-${lessonKey}`;
+  let currentAttempt = 1;
+
+  function getHistory(): Array<{ attempt: number; date: string; answers: Record<string, unknown>; score?: { correct: number; total: number } }> {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    } catch { return []; }
+  }
+
+  function saveHistory(entry: Record<string, unknown>) {
+    const history = getHistory();
+    history.push(entry);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    currentAttempt = history.length;
+    updateAttemptDisplay();
+  }
+
+  function updateAttemptDisplay() {
+    const el = document.getElementById('quiz-attempt');
+    if (el) el.textContent = `Intento #${currentAttempt}`;
+  }
+
+  // ── Score calculation ──
+  function calculateScore() {
+    let correct = 0;
+    let totalChoice = 0;
+    document.querySelectorAll<HTMLElement>('.quiz-question').forEach((el) => {
+      const qid = el.getAttribute('data-qid')!;
+      const type = el.getAttribute('data-type');
+      if (type !== 'choice') return;
+      const saved = localStorage.getItem(getStorageKey(qid));
+      if (!saved) return;
+      try {
+        const state = JSON.parse(saved);
+        if (state.checked && state.selected !== undefined) {
+          totalChoice++;
+          if (state.selected === state.correct) correct++;
+        }
+      } catch { /* skip */ }
+    });
+
+    const scoreEl = document.getElementById('quiz-score');
+    const scoreText = document.getElementById('score-text');
+    if (!scoreEl || !scoreText || totalChoice === 0) return;
+
+    scoreEl.hidden = false;
+    const pct = Math.round((correct / totalChoice) * 100);
+    let cssClass = 'needs-work';
+    if (pct === 100) cssClass = 'perfect';
+    else if (pct >= 70) cssClass = 'good';
+
+    scoreText.innerHTML = `<span class="${cssClass}">${correct}/${totalChoice} (${pct}%)</span>`;
+  }
+
+  // ── Retry ──
+  function resetQuiz() {
+    // Save current attempt to history
+    const answers: Record<string, unknown> = {};
+    document.querySelectorAll<HTMLElement>('.quiz-question').forEach((el) => {
+      const qid = el.getAttribute('data-qid')!;
+      const saved = localStorage.getItem(getStorageKey(qid));
+      if (saved) {
+        try { answers[qid] = JSON.parse(saved); } catch { /* skip */ }
+      }
+    });
+
+    let correct = 0;
+    let total = 0;
+    Object.values(answers).forEach((a: any) => {
+      if (a.checked && a.selected !== undefined) {
+        total++;
+        if (a.selected === a.correct) correct++;
+      }
+    });
+
+    saveHistory({
+      attempt: currentAttempt,
+      date: new Date().toISOString(),
+      answers,
+      score: { correct, total },
+    });
+
+    // Reload page to get new randomized questions
+    window.location.reload();
+  }
+
+  document.getElementById('btn-retry')?.addEventListener('click', resetQuiz);
+
+  // Shake animation for validation
+  const shakeStyle = document.createElement('style');
+  shakeStyle.textContent = `
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .q-choices.shake { animation: shake 0.3s ease-in-out; }
+  `;
+  document.head.appendChild(shakeStyle);
+
+  // ── Shuffle choice options ──
+  document.querySelectorAll<HTMLElement>('.quiz-question[data-type="choice"]').forEach((el) => {
+    const choicesContainer = el.querySelector('.q-choices');
+    if (!choicesContainer) return;
+
+    const correctLabel = el.getAttribute('data-correct-label');
+    const choices = Array.from(choicesContainer.querySelectorAll<HTMLElement>('.choice-option'));
+
+    // Fisher-Yates shuffle
+    for (let i = choices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      choicesContainer.insertBefore(choices[j], choices[i]);
+      [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+
+    // Update data-index and find new correct position
+    let newCorrectIdx = 0;
+    choices.forEach((choice, idx) => {
+      choice.setAttribute('data-index', String(idx));
+      const marker = choice.querySelector('.choice-marker');
+      if (marker && marker.textContent?.startsWith(correctLabel || '')) {
+        newCorrectIdx = idx;
+      }
+    });
+
+    el.setAttribute('data-correct', String(newCorrectIdx));
+  });
+
+  // Init
+  const history = getHistory();
+  currentAttempt = history.length + 1;
+  updateAttemptDisplay();
+  loadSavedState();
+</script>

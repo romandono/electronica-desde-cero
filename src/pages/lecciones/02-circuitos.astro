@@ -1,0 +1,153 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Quiz from '../../components/Quiz.astro';
+import { getQuestionsByLesson } from '../../data/questions';
+
+const questions = getQuestionsByLesson('l02-circuitos', 5);
+---
+
+<Layout title="Lección 2: Circuitos serie y paralelo" lessonNumber={2}>
+  <h1>Circuitos en serie y en paralelo</h1>
+
+  <h2>Objetivo</h2>
+  <p>Entender cómo se comportan la tensión y la corriente cuando hay varias resistencias conectadas en serie o en paralelo, calcular la resistencia equivalente y aplicar el divisor de tensión.</p>
+
+  <h2>1. ¿Por qué importa esto?</h2>
+  <p>Hasta ahora hemos visto circuitos con una sola resistencia. En la práctica, cualquier circuito tiene múltiples componentes. Entender cómo se combinan es fundamental para:</p>
+  <ul>
+    <li>Calcular la resistencia total que "ve" una fuente</li>
+    <li>Saber cuánta corriente pasa por cada componente</li>
+    <li>Diseñar divisores de tensión (muy usados con sensores)</li>
+    <li>Dimensionar correctamente las resistencias para LEDs</li>
+  </ul>
+
+  <h2>2. Circuito en serie</h2>
+  <p>Dos o más componentes están <strong>en serie</strong> cuando comparten el mismo camino: la corriente que sale de uno entra directamente en el siguiente. Solo hay un camino posible.</p>
+
+  <pre><code>
+  +----[ R1 ]----[ R2 ]----[ R3 ]----+
+  |                                  |
+  +|                                |
+  ---  Vfuente                       |
+  ---                                |
+  |                                  |
+  +----------------------------------+
+  </code></pre>
+
+  <h3>Propiedades del circuito serie</h3>
+  <table>
+    <tr><th>Corriente</th><td><strong>Igual</strong> en todos los componentes. I_total = I1 = I2 = I3</td></tr>
+    <tr><th>Tensión</th><td><strong>Se divide</strong> entre los componentes. V_total = V1 + V2 + V3</td></tr>
+    <tr><th>Resistencia equivalente</th><td><strong>Req = R1 + R2 + R3</strong></td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>💡 Regla nemotécnica:</strong> Serie = Same Intensity (misma intensidad). La I no cambia.
+  </div>
+
+  <h3>Ejemplo</h3>
+  <p>R1 = 100 Ω, R2 = 200 Ω en serie con fuente de 9 V:</p>
+  <pre><code>Req = 100 + 200 = 300 Ω
+I = V / Req = 9 / 300 = 0.03 A = 30 mA
+V_R1 = I × R1 = 0.03 × 100 = 3 V
+V_R2 = I × R2 = 0.03 × 200 = 6 V
+Comprobación: 3 V + 6 V = 9 V ✓</code></pre>
+
+  <h2>3. Circuito en paralelo</h2>
+  <p>Dos o más componentes están <strong>en paralelo</strong> cuando comparten los mismos dos nodos: ambos extremos de cada componente están conectados a los mismos puntos.</p>
+
+  <pre><code>
+  +----------------------------+
+  |                            |
+  +|       +--[ R1 ]--+       |
+  ---      |           |      |
+  ---      +--[ R2 ]--+      |
+  |                            |
+  +----------------------------+
+  </code></pre>
+
+  <h3>Propiedades del circuito paralelo</h3>
+  <table>
+    <tr><th>Tensión</th><td><strong>Igual</strong> en todas las ramas. V_total = V1 = V2 = V3</td></tr>
+    <tr><th>Corriente</th><td><strong>Se divide</strong> entre las ramas. I_total = I1 + I2 + I3</td></tr>
+    <tr><th>Resistencia equivalente</th><td><strong>1/Req = 1/R1 + 1/R2 + 1/R3</strong></td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>💡 Regla nemotécnica:</strong> Paralelo = Potencial idéntico (misma tensión). La V no cambia entre ramas.
+  </div>
+
+  <h3>Ejemplo</h3>
+  <p>R1 = 100 Ω, R2 = 200 Ω en paralelo con fuente de 12 V:</p>
+  <pre><code>1/Req = 1/100 + 1/200 = 0.01 + 0.005 = 0.015
+Req = 1 / 0.015 = 66.7 Ω
+
+I_total = 12 / 66.7 = 0.18 A = 180 mA
+I_R1 = 12 / 100 = 0.12 A = 120 mA
+I_R2 = 12 / 200 = 0.06 A = 60 mA
+Comprobación: 120 mA + 60 mA = 180 mA ✓</code></pre>
+
+  <div class="callout warning">
+    <strong>⚠️ Importante:</strong> En paralelo, la Req <strong>siempre es menor que la menor resistencia</strong> del conjunto. Añadir resistencias en paralelo siempre reduce la Req total.
+  </div>
+
+  <h2>4. Comparativa serie vs paralelo</h2>
+  <table>
+    <thead>
+      <tr><th></th><th>Serie</th><th>Paralelo</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Tensión</td><td>Se reparte (divide)</td><td>Igual en todas las ramas</td></tr>
+      <tr><td>Corriente</td><td>Igual en todo el camino</td><td>Se reparte entre ramas</td></tr>
+      <tr><td>Req</td><td>Suma: R1 + R2</td><td>Inversa: 1/(1/R1 + 1/R2)</td></tr>
+      <tr><td>Si falla un componente</td><td>Se abre todo el circuito</td><td>El resto sigue funcionando</td></tr>
+      <tr><td>Ejemplo real</td><td>Luces de Navidad antiguas</td><td>Enchufes de casa</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. Divisor de tensión</h2>
+  <p>Un divisor de tensión es un caso especial de circuito serie con dos resistencias. Se usa para obtener una tensión menor a partir de una fuente.</p>
+
+  <div class="formula">Vout = Vin × R2 / (R1 + R2)</div>
+
+  <pre><code>
+       Vin
+        |
+       [R1]
+        +------ Vout
+       [R2]
+        |
+       GND
+  </code></pre>
+
+  <p><strong>Ejemplo práctico:</strong> Tienes un sensor que da 5 V pero tu microcontrolador solo acepta 3.3 V. Con R1 = 1.7kΩ y R2 = 3.3kΩ:</p>
+  <pre><code>Vout = 5 × 3.3kΩ / (1.7kΩ + 3.3kΩ) = 5 × 0.66 = 3.3 V ✓</code></pre>
+
+  <div class="callout warning">
+    <strong>⚠️ Cuidado:</strong> El divisor solo funciona bien si la corriente que consumes de Vout es despreciable frente a la que circula por R1-R2. Si le conectas una carga, la tensión cae.
+  </div>
+
+  <h2>6. Circuitos mixtos</h2>
+  <p>En la práctica, los circuitos combinan serie y paralelo. Se resuelven por partes:</p>
+  <ol>
+    <li>Identificar bloques en paralelo y calcular su Req</li>
+    <li>Sustituir cada bloque por su Req</li>
+    <li>Resolver el circuito serie resultante</li>
+    <li>Deshacer el camino para calcular corrientes y tensiones en cada componente</li>
+  </ol>
+
+  <h2>7. Errores habituales</h2>
+  <ol>
+    <li><strong>Sumar resistencias en paralelo como si fuera serie:</strong> NO. 100 Ω ∥ 200 Ω ≠ 300 Ω.</li>
+    <li><strong>Pensar que la Req en paralelo es el promedio:</strong> NO. Es menor que la más pequeña.</li>
+    <li><strong>Olvidar que en paralelo la tensión es la misma:</strong> error clásico al medir.</li>
+    <li><strong>Usar mal el divisor de tensión:</strong> R2 es la resistencia sobre la que mides Vout, no la de arriba.</li>
+  </ol>
+
+  <Quiz lessonKey="l02-circuitos" questions={questions} />
+
+  <div class="lesson-nav">
+    <a href="/lecciones/01-electricidad">← Lección 1</a>
+    <a href="/lecciones/03-potencia">Lección 3 →</a>
+  </div>
+</Layout>

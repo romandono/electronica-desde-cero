@@ -1,0 +1,104 @@
+---
+export interface Props {
+  title: string;
+  lessonNumber?: number;
+}
+const { title, lessonNumber } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} — Electrónica desde Cero</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+  </head>
+  <body>
+    <!-- Mobile hamburger -->
+    <button class="menu-toggle" id="menu-toggle" aria-label="Menú">
+      <span></span>
+    </button>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">Electrónica desde Cero</div>
+      <a href="/" class:list={["/", "/index"].includes(Astro.url.pathname) ? "active" : undefined}>
+        📋 Índice
+      </a>
+
+      <hr />
+
+      <div class="sidebar-section">Fase 1: Fundamentos</div>
+      <a href="/lecciones/01-electricidad" class:list={Astro.url.pathname.startsWith("/lecciones/01") ? "active" : undefined}>
+        L1 · Electricidad y Ley de Ohm
+      </a>
+      <a href="/lecciones/02-circuitos" class:list={Astro.url.pathname.startsWith("/lecciones/02") ? "active" : undefined}>
+        L2 · Circuitos serie y paralelo
+      </a>
+      <a href="/lecciones/03-potencia" class:list={Astro.url.pathname.startsWith("/lecciones/03") ? "active" : undefined}>
+        L3 · Potencia y energía
+      </a>
+      <a href="/lecciones/04-kirchhoff" class:list={Astro.url.pathname.startsWith("/lecciones/04") ? "active" : undefined}>
+        L4 · Leyes de Kirchhoff
+      </a>
+
+      <hr />
+
+      <div class="sidebar-section">Evaluación</div>
+      <a href="/examenes" class:list={Astro.url.pathname === "/examenes" ? "active" : undefined}>
+        📝 Exámenes
+      </a>
+      <a href="/examenes/fase1" class:list={Astro.url.pathname === "/examenes/fase1" ? "active" : undefined} style="padding-left:1.5rem;font-size:0.85rem;">
+        Fase 1
+      </a>
+    </nav>
+
+    <main>
+      {
+        lessonNumber && (
+          <p style="color:var(--color-text-muted);font-size:0.85rem;margin-bottom:0;">
+            Lección {lessonNumber}
+          </p>
+        )
+      }
+      <slot />
+    </main>
+
+    <script>
+      const toggle = document.getElementById('menu-toggle')!;
+      const sidebar = document.getElementById('sidebar')!;
+      const overlay = document.getElementById('sidebar-overlay')!;
+
+      function open() {
+        toggle.classList.add('open');
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+      }
+
+      function close() {
+        toggle.classList.remove('open');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+
+      toggle.addEventListener('click', () => {
+        sidebar.classList.contains('open') ? close() : open();
+      });
+
+      overlay.addEventListener('click', close);
+
+      // Close on nav link click
+      sidebar.querySelectorAll('a').forEach((a) => {
+        a.addEventListener('click', () => {
+          if (window.innerWidth <= 860) setTimeout(close, 150);
+        });
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') close();
+      });
+    </script>
+  </body>
+</html>
