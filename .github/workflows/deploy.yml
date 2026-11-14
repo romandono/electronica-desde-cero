@@ -1,0 +1,21 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write runtime .env
+        run: |
+          printf 'OPENROUTER_API_KEY=%s\n' '${{ secrets.OPENROUTER_API_KEY }}' > .env
+          printf 'OPENROUTER_MODEL=anthropic/claude-haiku-5.5\n' >> .env
+          chmod 600 .env
+
+      - name: Build and deploy
+        run: docker compose up -d --build

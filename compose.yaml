@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    image: electronica-desde-cero:latest
+    container_name: electronica-desde-cero
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4321:4321"
+    env_file: .env
