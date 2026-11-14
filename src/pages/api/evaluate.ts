@@ -20,7 +20,7 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const apiKey = await getSecret('OPENROUTER_API_KEY');
-    const model = 'anthropic/claude-haiku-5.5';
+    const model = (await getSecret('OPENROUTER_MODEL')) || 'anthropic/claude-haiku-5.5';
 
     if (!apiKey) {
       return new Response(

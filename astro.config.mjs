@@ -16,13 +16,9 @@ export default defineConfig({
       }),
       OPENROUTER_MODEL: envField.string({
         context: 'server',
-        access: 'public',
+        access: 'secret',
+        optional: true,
         default: 'anthropic/claude-haiku-5.5',
-      }),
-      PORT: envField.string({
-        context: 'server',
-        access: 'public',
-        default: '4321',
       }),
     },
   },
