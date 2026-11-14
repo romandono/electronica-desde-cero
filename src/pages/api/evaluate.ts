@@ -1,3 +1,5 @@
+import { getSecret } from 'astro:env/server';
+
 export const prerender = false;
 
 interface EvaluateRequest {
@@ -17,8 +19,8 @@ export async function POST({ request }: { request: Request }) {
       );
     }
 
-    const apiKey = import.meta.env.OPENROUTER_API_KEY;
-    const model = import.meta.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001';
+    const apiKey = await getSecret('OPENROUTER_API_KEY');
+    const model = 'anthropic/claude-haiku-5.5';
 
     if (!apiKey) {
       return new Response(
@@ -81,14 +83,12 @@ Devuelve SOLO este JSON (sin markdown):
 
     let parsed;
     try {
-      // Some models wrap JSON in markdown code blocks
       let clean = content.trim();
       if (clean.startsWith('```')) {
         clean = clean.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
       }
       parsed = JSON.parse(clean);
     } catch {
-      // If JSON parse fails, return raw text as feedback
       parsed = {
         verdict: 'partial',
         feedback: content,
