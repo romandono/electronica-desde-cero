@@ -535,6 +535,9 @@ const { lessonKey, questions, retryable = true, showScore = true } = Astro.props
       if (saved) {
         try { answers[qid] = JSON.parse(saved); } catch { /* skip */ }
       }
+      // Clear individual question state so reload starts fresh
+      localStorage.removeItem(getStorageKey(qid));
+      localStorage.removeItem(getStorageKey(qid) + '-ai');
     });
 
     let correct = 0;
