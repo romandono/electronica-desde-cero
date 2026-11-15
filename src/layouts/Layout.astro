@@ -84,6 +84,25 @@ function getLessonContext(pathname: string): string {
     <ChatWidget lessonContext={getLessonContext(Astro.url.pathname)} />
 
     <script>
+      // ── Storage versioning: clear stale data on schema changes ──
+      (() => {
+        const VERSION = '2';
+        const versionKey = 'elec-storage-version';
+        const current = localStorage.getItem(versionKey);
+        if (current !== VERSION) {
+          // Clear all quiz and chat data
+          const keys = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('elec-quiz-') || key.startsWith('elec-chat-'))) {
+              keys.push(key);
+            }
+          }
+          keys.forEach((k) => localStorage.removeItem(k));
+          localStorage.setItem(versionKey, VERSION);
+        }
+      })();
+
       const toggle = document.getElementById('menu-toggle')!;
       const sidebar = document.getElementById('sidebar')!;
       const overlay = document.getElementById('sidebar-overlay')!;
