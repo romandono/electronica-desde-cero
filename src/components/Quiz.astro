@@ -33,7 +33,7 @@ const { lessonKey, questions, retryable = true, showScore = true } = Astro.props
 
   {
     questions.map((q, i) => (
-      <div class="quiz-question" data-qid={q.id} data-lesson={lessonKey} data-type={q.type} data-correct={q.type === 'choice' ? q.correct : undefined} data-correct-label={q.type === 'choice' && q.options && q.correct !== undefined ? q.options[q.correct].label : undefined}>
+      <div class="quiz-question" data-qid={q.id} data-lesson={lessonKey} data-type={q.type} data-correct={q.type === 'choice' ? q.correct : undefined}>
         <div class="q-number">Pregunta {i + 1}</div>
         <div class="q-text">{q.text}</div>
 
@@ -570,34 +570,6 @@ const { lessonKey, questions, retryable = true, showScore = true } = Astro.props
     .q-choices.shake { animation: shake 0.3s ease-in-out; }
   `;
   document.head.appendChild(shakeStyle);
-
-  // ── Shuffle choice options ──
-  document.querySelectorAll<HTMLElement>('.quiz-question[data-type="choice"]').forEach((el) => {
-    const choicesContainer = el.querySelector('.q-choices');
-    if (!choicesContainer) return;
-
-    const correctLabel = el.getAttribute('data-correct-label');
-    const choices = Array.from(choicesContainer.querySelectorAll<HTMLElement>('.choice-option'));
-
-    // Fisher-Yates shuffle
-    for (let i = choices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      choicesContainer.insertBefore(choices[j], choices[i]);
-      [choices[i], choices[j]] = [choices[j], choices[i]];
-    }
-
-    // Update data-index and find new correct position
-    let newCorrectIdx = 0;
-    choices.forEach((choice, idx) => {
-      choice.setAttribute('data-index', String(idx));
-      const marker = choice.querySelector('.choice-marker');
-      if (marker && marker.textContent?.startsWith(correctLabel || '')) {
-        newCorrectIdx = idx;
-      }
-    });
-
-    el.setAttribute('data-correct', String(newCorrectIdx));
-  });
 
   // Init
   const history = getHistory();
